@@ -38,9 +38,10 @@ notesRouter.get('/:id', async(request, response) => {
 })
 
 
-
 notesRouter.post('/', async (request, response) => {
   const body = request.body
+
+  // jwt.sign()
 
   const token = getTokenFrom(request)
   const decodedToken = jwt.verify(token, process.env.SECRET)
@@ -58,20 +59,19 @@ notesRouter.post('/', async (request, response) => {
     user: user._id
   })
 
-  // note.save()
-  //   .then(savedNote => {
-  //     response.json(savedNote)
-  //   })
-  //   .catch(error => next(error))
-
-  // const savedNote = await note.save()
-  // response.json(savedNote)
-
   const savedNote = await note.save()
   user.notes = user.notes.concat(savedNote._id)
   await user.save()
 
   response.json(savedNote)
+})
+
+notesRouter.put('/:id', async(request, response) => {
+  const body = request.body
+
+  const updatedNote = await Note.findByIdAndUpdate(request.params.id, body)
+
+  response.json(updatedNote)
 })
 
 notesRouter.delete('/:id', async(request, response) => {
@@ -80,21 +80,5 @@ notesRouter.delete('/:id', async(request, response) => {
   response.status(204).end()
 
 })
-
-// notesRouter.put('/:id', async(request, response, next) => {
-
-//   try{
-//     const body = request.body
-
-//     const note = {
-//       content: body.content,
-//       important: body.important,
-//     }
-//     await Note.findByIdAndUpdate(request.params.id, note, { new: true })
-//     response.json(updatedNote)
-//   }catch(exception){
-//     next(exception)
-// })
-
 
 module.exports = notesRouter
